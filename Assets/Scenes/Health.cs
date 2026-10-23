@@ -13,7 +13,7 @@ public class Health : MonoBehaviour
 
     public event Action OnDied;
     
-    public bool isDead 
+    public bool IsDead
     {
         get {return currHP <= 0;}
     }
@@ -25,7 +25,7 @@ public class Health : MonoBehaviour
 
     public void takeDamage(int amount)
     {
-        if (isDead) return;
+        if (IsDead) return;
 
         amount = Mathf.Max(0,amount);
         currHP = Mathf.Max(0, currHP - amount);
@@ -38,7 +38,7 @@ public class Health : MonoBehaviour
     }
     public void Heal(int amount)
     {
-        if (isDead) return;
+        if (IsDead) return;
 
         amount = Mathf.Max(0,amount);
         currHP = Mathf.Max(0, currHP + amount);

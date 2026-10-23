@@ -46,14 +46,14 @@ public class TurnBase : MonoBehaviour
     void BaseColorMenu() 
     {
         state = BattleState.PlayerTurn;
-        messageText.text = "Pick a Base Color!";
+        message.text = "Pick a Base Color!";
         setBackButton(false);
 
         ElementColor[] colors = {ElementColor.Red, ElementColor.Yellow, ElementColor.Blue};
         for (int i = 0; i < moveButtons.Length; i++) 
         {
             bool used = i < colors.Length;
-            moveButtons[i].gameObject.setActive();
+            moveButtons[i].gameObject.SetActive(used);
             if (!used) continue;
 
             //possibly fix later for color changes
@@ -64,7 +64,7 @@ public class TurnBase : MonoBehaviour
 
     }
 
-    void OnBaseColorSelected() 
+    void OnBaseColorSelected(ElementColor color) 
     {
         if (state != BattleState.PlayerTurn) return;
         ShowMoveMenu(color);
@@ -73,7 +73,7 @@ public class TurnBase : MonoBehaviour
     void ShowMoveMenu(ElementColor baseColor)
     {
         pickedColor = baseColor;
-        messageText.text = "Pick a " + baseColor + "move!";
+        message.text = "Pick a " + baseColor + "move!";
         setBackButton(true);
 
         List<MoveData> options = GetMovesFor(baseColor);
@@ -145,24 +145,24 @@ public class TurnBase : MonoBehaviour
         StartPlayerTurn();
     }
 
-    IEnumerator UseMove(Entity ant user, Entity target, MoveData move)
+    IEnumerator UseMove(Entity user, Entity target, MoveData move)
     {
         if (move.isHeal)
         {
-            user.Health.Heal(move.power);
-            messageText.text = user.displayName + " used " + move.moveName + "!";
+            user.health.Heal(move.damage);
+            message.text = user.displayName + " used " + move.moveName + "!";
         }
         else
         {
-            target.health.takeDamage(move.power);
-            messageText.text = user.displayName + " used " + move.moveName + "!";
+            target.health.takeDamage(move.damage);
+            message.text = user.displayName + " used " + move.moveName + "!";
         }
         //ask
         yield return new WaitForSeconds(turnDelay);
 
-        if (!move.isHeal && target.health.isDead)
+        if (!move.isHeal && target.health.IsDead)
         {
-            messageText.text = target.displayName + " fainted!";
+            message.text = target.displayName + " fainted!";
             yield return new WaitForSeconds(turnDelay);
         }
     }
@@ -171,7 +171,7 @@ public class TurnBase : MonoBehaviour
     {
         foreach (Entity enemy in enemies)
         {
-            if (enemy.health.isDead) return enemy;
+            if (!enemy.health.IsDead) return enemy;
         }
         return null;
     }
@@ -210,10 +210,10 @@ public class TurnBase : MonoBehaviour
         if (backButton != null) backButton.gameObject.SetActive(show);
     }
 
-    void EndBattle(BattleState result, string message)
+    void EndBattle(BattleState result, string msg)
     {
         state = result;
-        messageText.text = message;
+        message.text = msg;
         ButtonsInteractable(false);
         setBackButton(false);
     }
