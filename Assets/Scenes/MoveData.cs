@@ -9,6 +9,7 @@ public class MoveData : ScriptableObject
     [Header("Inscribed")]
     public string moveName = "";
     public int damage = 2;
+    [SerializeField] public AudioClip sound;
 
     public bool isHeal = false;
 
@@ -17,4 +18,10 @@ public class MoveData : ScriptableObject
     public ElementColor[] usableFrom;
 
     public Color buttonColor = Color.white;
+    [Header("Area of Effect")]
+    public bool isAOE = false;
+
+    [Header("Damage Over Time")]
+    public int perTurnDOT = 0;
+    public int turnsOfDOT = 0;
 }

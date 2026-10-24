@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
+
+    [SerializeField] private AudioClip damageSound;
+
     [Header("Inscribed")]
     public int maxHP = 10;
 
@@ -30,6 +33,7 @@ public class Health : MonoBehaviour
         amount = Mathf.Max(0,amount);
         currHP = Mathf.Max(0, currHP - amount);
         OnHealthChanged?.Invoke(currHP,maxHP);
+        SoundFXManager.instance.PlaySoundFXCLip(damageSound, transform, 1f);
 
         if (currHP == 0)
         {

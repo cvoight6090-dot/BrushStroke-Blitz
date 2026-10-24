@@ -142,28 +142,122 @@ public class TurnBase : MonoBehaviour
                 yield break;
             }
         }
+
+        yield return TickDamageOverTime();
+
+        if (GetFirstLivingEnemy() == null)
+        {
+            //change later
+            EndBattle(BattleState.Won, "You Won!!");
+            yield break;
+        }
+        if (player.health.IsDead)
+        {
+            EndBattle(BattleState.Lost, "You Lost");
+            yield break;
+        }
+
         StartPlayerTurn();
     }
 
     IEnumerator UseMove(Entity user, Entity target, MoveData move)
     {
+        List<Entity> targets = new List<Entity>();
+        if (move.sound != null)
+        {
+            SoundFXManager.instance.PlaySoundFXCLip(move.sound, transform, 2f);
+        }
+        yield return new WaitForSeconds(turnDelay);
         if (move.isHeal)
         {
             user.health.Heal(move.damage);
-            message.text = user.displayName + " used " + move.moveName + "!";
+            message.text = user.displayName + " used " + move.moveName + " and healed!";
+            yield return new WaitForSeconds(turnDelay);
+            
+            if (user == player && move.isAOE)
+            {
+               foreach(Entity enemy in enemies)
+                {
+                if (!enemy.health.IsDead) targets.Add(enemy);
+                }
+                foreach (Entity t in targets)
+                {
+                    if (move.turnsOfDOT > 0 && move.perTurnDOT > 0)
+                    {
+                    t.AddDOT(move.moveName, move.perTurnDOT, move.turnsOfDOT);
+                    yield return new WaitForSeconds(turnDelay);
+                    }
+                }
+            }
+            
+            yield break;
+        }
+
+        
+        if (user == player && move.isAOE)
+        {
+            foreach(Entity enemy in enemies)
+            {
+                if (!enemy.health.IsDead) targets.Add(enemy);
+            }
         }
         else
         {
-            target.health.takeDamage(move.damage);
-            message.text = user.displayName + " used " + move.moveName + "!";
+            targets.Add(target);
+        }
+
+
+        foreach (Entity t in targets)
+        {
+            if (move.damage > 0)
+            {
+                t.health.takeDamage(move.damage);
+                message.text = user.displayName + " used " + move.moveName + "!";
+            }
+            if (move.turnsOfDOT > 0 && move.perTurnDOT > 0)
+            {
+                t.AddDOT(move.moveName, move.perTurnDOT, move.turnsOfDOT);
+            }
         }
         //ask
         yield return new WaitForSeconds(turnDelay);
 
-        if (!move.isHeal && target.health.IsDead)
+        foreach(Entity t in targets)
         {
-            message.text = target.displayName + " fainted!";
+            if (t.health.IsDead)
+            {
+                message.text = t.displayName + " fainted!";
+                yield return new WaitForSeconds(turnDelay);
+                if (enemies.Contains(t))
+                {
+                    RemoveEnemy(t);
+                }
+            }
+        }
+    }
+
+    IEnumerator TickDamageOverTime() 
+    {
+        List<Entity> everyone = new List<Entity>();
+        everyone.Add(player);
+        everyone.AddRange(enemies);
+
+        foreach(Entity e in everyone)
+        {
+            if (e.health.IsDead || !e.haveDOT) continue;
+
+            int damage = e.TickDOT();
+            e.health.takeDamage(damage);
+            message.text = e.displayName + " took " + damage + " damage over time!";
+            
             yield return new WaitForSeconds(turnDelay);
+
+            if (e.health.IsDead)
+            {
+                message.text = e.displayName + " fainted!";
+                yield return new WaitForSeconds(turnDelay);
+            }
+            
         }
     }
 
@@ -174,6 +268,12 @@ public class TurnBase : MonoBehaviour
             if (!enemy.health.IsDead) return enemy;
         }
         return null;
+    }
+
+    void RemoveEnemy(Entity enemy) 
+    {
+        enemies.Remove(enemy);
+        Destroy(enemy.gameObject);
     }
 
     void SetupButton(Button button, string label, Color tint, UnityAction onClick) 
