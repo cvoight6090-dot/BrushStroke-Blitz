@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum ElementColor {Red, Yellow, Blue}
+public enum ElementColor {Red, Yellow, Blue, Orange, Green, Purple}
 //creating moves as data and not code
 [CreateAssetMenu(fileName = "NewMove", menuName = "Battle/Move")]
 
@@ -18,8 +18,15 @@ public class MoveData : ScriptableObject
     public ElementColor[] usableFrom;
 
     public Color buttonColor = Color.white;
+
+    [Header("Color Type")]
+    public ElementColor moveColor = ElementColor.Red;
+
     [Header("Area of Effect")]
     public bool isAOE = false;
+
+    [Header("Shield")]
+    public bool givesShield = false;
 
     [Header("Damage Over Time")]
     public int perTurnDOT = 0;

@@ -21,11 +21,38 @@ public class TurnBase : MonoBehaviour
     //ui move anouncements
     public TMP_Text message;
 
-    public float turnDelay = 1f;
+    public float turnDelay = 2f;
 
+    //adjust this potentially
+    [Header("Color Pallete")]
+    public Color redColor = new Color(0.9f,0.2f,0.2f);
+    public Color yellowColor = new Color(1f,0.85f,0.2f);
+    public Color blueColor = new Color(0.2f,0.4f,0.9f);
+    public Color orangeColor = new Color(1f,0.6f,0.2f);
+    public Color greenColor = new Color(0.3f,0.75f,0.3f);
+    public Color purpleColor = new Color(0.6f,0.3f,0.8f);
+
+    [Header("Damage Multiplier Based on Color Wheel")]
+    [Tooltip("Attack same as entity color")]
+    public float sameMultiplier = 0.5f;
+
+    [Tooltip("Attack neighbors entity color")]
+    public float neighborMultiplier = 1f;
+
+    [Tooltip("Attack neighbors to opposite entity color")]
+    public float oppNeighborMultiplier = 2f;
+
+    [Tooltip("Attack opposite of entity color")]
+    public float oppositeMultiplier = 2f;
+
+    
     [Header("Dynamic")]
     public BattleState state;
     public ElementColor pickedColor;
+
+    //for other scripts to call,, monitor use
+    public event System.Action<ElementColor, Color> OnBaseColorPicked;
+    public event System.Action OnBaseColorCleared;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -36,6 +63,31 @@ public class TurnBase : MonoBehaviour
         }
         StartPlayerTurn();
     }
+
+    public Color GetColor(ElementColor color)
+    {
+        switch (color)
+        {
+            case ElementColor.Red: return redColor;
+            case ElementColor.Yellow: return yellowColor;
+            case ElementColor.Blue: return blueColor;
+            case ElementColor.Orange: return orangeColor;
+            case ElementColor.Green: return greenColor;
+            default: return purpleColor;
+        }
+    }
+
+    public float GetMatchupMult(ElementColor attackColor, ElementColor entityType)
+    {
+        switch (ColorWheel.Distance(attackColor, entityType))
+        {
+            case 0: return sameMultiplier;
+            case 1: return neighborMultiplier;
+            case 2: return oppNeighborMultiplier;
+            default: return oppositeMultiplier;
+        }
+    }
+
 
     void StartPlayerTurn() 
     {
@@ -48,6 +100,7 @@ public class TurnBase : MonoBehaviour
         state = BattleState.PlayerTurn;
         message.text = "Pick a Base Color!";
         setBackButton(false);
+        OnBaseColorCleared?.Invoke();
 
         ElementColor[] colors = {ElementColor.Red, ElementColor.Yellow, ElementColor.Blue};
         for (int i = 0; i < moveButtons.Length; i++) 
@@ -58,7 +111,7 @@ public class TurnBase : MonoBehaviour
 
             //possibly fix later for color changes
             ElementColor color = colors[i];
-            SetupButton(moveButtons[i], color.ToString(), BaseToUnityColor(color),
+            SetupButton(moveButtons[i], color.ToString(), GetColor(color),
                         () => OnBaseColorSelected(color));
         }
 
@@ -73,6 +126,8 @@ public class TurnBase : MonoBehaviour
     void ShowMoveMenu(ElementColor baseColor)
     {
         pickedColor = baseColor;
+        player.elementType = baseColor;
+        OnBaseColorPicked?.Invoke(baseColor, GetColor(baseColor));
         message.text = "Pick a " + baseColor + "move!";
         setBackButton(true);
 
@@ -162,79 +217,138 @@ public class TurnBase : MonoBehaviour
 
     IEnumerator UseMove(Entity user, Entity target, MoveData move)
     {
-        List<Entity> targets = new List<Entity>();
         if (move.sound != null)
         {
             SoundFXManager.instance.PlaySoundFXCLip(move.sound, transform, 2f);
         }
         yield return new WaitForSeconds(turnDelay);
-        if (move.isHeal)
+
+        if (move.isHeal || move.givesShield)
         {
-            user.health.Heal(move.damage);
-            message.text = user.displayName + " used " + move.moveName + " and healed!";
-            yield return new WaitForSeconds(turnDelay);
-            
-            if (user == player && move.isAOE)
+            List<Entity> helped = GetSupportTargets(user,move);
+            foreach(Entity ally in helped)
             {
-               foreach(Entity enemy in enemies)
-                {
-                if (!enemy.health.IsDead) targets.Add(enemy);
-                }
-                foreach (Entity t in targets)
-                {
-                    if (move.turnsOfDOT > 0 && move.perTurnDOT > 0)
-                    {
-                    t.AddDOT(move.moveName, move.perTurnDOT, move.turnsOfDOT);
-                    yield return new WaitForSeconds(turnDelay);
-                    }
-                }
+                if (move.isHeal) ally.health.Heal(move.damage);
+                if (move.givesShield) ally.health.GiveShield();
             }
-            
+
+            string who = helped.Count > 1 ? "The whole team" : helped[0].displayName;
+            string result;
+            if (move.isHeal && move.givesShield) result = " was healed and got a shield!";
+            else if (move.isHeal) result = " was healed!";
+            else result = " got a shield!";
+
+            message.text = user.displayName + " used " + move.moveName + "! " + who + result;
+            yield return new WaitForSeconds(turnDelay);
             yield break;
         }
+        List<Entity> targets = GetDamageTargets(user, target, move);
 
-        
-        if (user == player && move.isAOE)
+        if (targets.Count > 1)
         {
-            foreach(Entity enemy in enemies)
-            {
-                if (!enemy.health.IsDead) targets.Add(enemy);
-            }
+            message.text = user.displayName + " used " + move.moveName + 
+            " on every enemy!";
         }
         else
         {
-            targets.Add(target);
+            message.text = user.displayName + " used " + move.moveName + 
+            "!";
         }
+        yield return new WaitForSeconds(turnDelay);
 
+        bool dealsDOT = move.turnsOfDOT > 0 && move.perTurnDOT > 0;
+        if (move.damage <= 0 && !dealsDOT) yield break;
+
+        bool paused = false;
 
         foreach (Entity t in targets)
         {
+            if (t.health.HasShield)
+            {
+                t.health.BreakShield();
+                message.text = t.displayName + "'s shield blocked a hit!";
+                yield return new WaitForSeconds(turnDelay);
+                paused = true;
+                continue;
+            }
+            float multiplier = GetMatchupMult(move.moveColor, t.elementType);
+
             if (move.damage > 0)
             {
-                t.health.takeDamage(move.damage);
-                message.text = user.displayName + " used " + move.moveName + "!";
+                int damage = Mathf.Max(1, Mathf.RoundToInt(move.damage * multiplier));
+                t.health.takeDamage(damage);
             }
-            if (move.turnsOfDOT > 0 && move.perTurnDOT > 0)
+            if (dealsDOT)
             {
                 t.AddDOT(move.moveName, move.perTurnDOT, move.turnsOfDOT);
             }
-        }
-        //ask
-        yield return new WaitForSeconds(turnDelay);
 
-        foreach(Entity t in targets)
-        {
+            if (move.damage > 0 && multiplier > 1f)
+            {
+                message.text = "It's super effective on " + t.displayName + "!";
+                yield return new WaitForSeconds(turnDelay);
+                paused = true;
+            }
+            else if (move.damage > 0 && multiplier < 1f)
+            {
+                message.text = "It's not very effective on " + t.displayName + "...";
+                yield return new WaitForSeconds(turnDelay);
+                paused = true;
+            }
+
             if (t.health.IsDead)
             {
                 message.text = t.displayName + " fainted!";
                 yield return new WaitForSeconds(turnDelay);
+                paused = true;
                 if (enemies.Contains(t))
                 {
                     RemoveEnemy(t);
                 }
             }
         }
+        //give more time even if there is no extra message
+        if (!paused) 
+        {
+            yield return new WaitForSeconds(turnDelay);
+        }
     }
+
+        List<Entity> GetSupportTargets(Entity user, MoveData move)
+        {
+            List<Entity> helped = new List<Entity>();
+
+            if (move.isAOE && user != player)
+            {
+                foreach (Entity enemy in enemies)
+                {
+                    if (!enemy.health.IsDead) helped.Add(enemy);
+                }
+            }
+            else
+            {
+                helped.Add(user);
+            }
+            return helped;
+        }
+        List<Entity> GetDamageTargets(Entity user,Entity defaultTarget, MoveData move)
+        {
+            List<Entity> targets = new List<Entity>();
+
+            if (user == player && move.isAOE)
+            {
+                foreach (Entity enemy in enemies)
+                {
+                    if (!enemy.health.IsDead) targets.Add(enemy);
+                }
+            }
+            else
+            {
+                targets.Add(defaultTarget);
+            }
+            return targets;
+        }
+    
 
     IEnumerator TickDamageOverTime() 
     {
@@ -286,16 +400,6 @@ public class TurnBase : MonoBehaviour
         button.onClick.AddListener(onClick);
     }
 
-    Color BaseToUnityColor(ElementColor color) 
-    {
-        switch (color)
-        {
-            case ElementColor.Red: return Color.red;
-            case ElementColor.Yellow: return Color.yellow;
-            default: return Color.blue;
-        }
-    }
-
     void ButtonsInteractable(bool val) 
     {
         foreach (Button button in moveButtons)
@@ -318,3 +422,4 @@ public class TurnBase : MonoBehaviour
         setBackButton(false);
     }
 }
+

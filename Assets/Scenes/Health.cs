@@ -16,6 +16,10 @@ public class Health : MonoBehaviour
 
     public event Action OnDied;
     
+    public event Action<bool> OnShieldChanged;
+
+    public bool HasShield { get; private set; }
+
     public bool IsDead
     {
         get {return currHP <= 0;}
@@ -49,5 +53,21 @@ public class Health : MonoBehaviour
         //idk if neccessary
         if (currHP > maxHP) currHP = maxHP;
         OnHealthChanged?.Invoke(currHP, maxHP);
+    }
+
+    public void GiveShield()
+    {
+        if (IsDead) return;
+
+        HasShield = true;
+        OnShieldChanged?.Invoke(true);
+    }
+
+    public void BreakShield()
+    {
+        if (!HasShield) return;
+
+        HasShield = false;
+        OnShieldChanged?.Invoke(false);
     }
 }

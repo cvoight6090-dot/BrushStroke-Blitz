@@ -14,6 +14,8 @@ public class Entity : MonoBehaviour
 
     [Header("Inscribed")]
     public string displayName = "Enemy";
+
+    public ElementColor elementType = ElementColor.Red;
     public MoveData[] moves;
 
     public Health health{ get; private set;} 
