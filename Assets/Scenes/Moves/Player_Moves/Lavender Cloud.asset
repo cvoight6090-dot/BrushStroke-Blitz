@@ -15,9 +15,13 @@ MonoBehaviour:
   moveName: Lavender Cloud
   damage: 0
   sound: {fileID: 8300000, guid: 13d089937ec89477eb9ffe92e417b28a, type: 3}
+  effectPrefab: {fileID: 4494753355907600848, guid: 95537679b7f77465ab00967ef3f7f4d9, type: 3}
+  effectDuration: 1
   isHeal: 0
   usableFrom: 02000000
   buttonColor: {r: 0.72906923, g: 0.46907264, b: 0.7830189, a: 1}
+  moveColor: 5
   isAOE: 1
+  givesShield: 0
   perTurnDOT: 2
   turnsOfDOT: 2

@@ -15,9 +15,13 @@ MonoBehaviour:
   moveName: Valley of Glaciers
   damage: 2
   sound: {fileID: 8300000, guid: 5215f48fb907144dcaf692900a2a518b, type: 3}
+  effectPrefab: {fileID: 7248760112558536732, guid: 50d74db4a07aa4727a4993ff0476aa49, type: 3}
+  effectDuration: 1
   isHeal: 0
   usableFrom: 02000000
   buttonColor: {r: 0.11173906, g: 0.69049215, b: 0.8773585, a: 1}
+  moveColor: 2
   isAOE: 1
+  givesShield: 0
   perTurnDOT: 0
   turnsOfDOT: 0

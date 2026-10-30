@@ -14,12 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MoveData
   moveName: Igloo
   damage: 0
-  sound: {fileID: 0}
+  sound: {fileID: 8300000, guid: f26bfd1686f04431ba09105a260631ff, type: 3}
+  effectPrefab: {fileID: 0}
+  effectDuration: 1
   isHeal: 0
   usableFrom: 
   buttonColor: {r: 1, g: 1, b: 1, a: 1}
   moveColor: 2
-  isAOE: 1
+  isAOE: 0
   givesShield: 1
   perTurnDOT: 0
   turnsOfDOT: 0

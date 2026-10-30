@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Events;
@@ -21,7 +22,7 @@ public class TurnBase : MonoBehaviour
     //ui move anouncements
     public TMP_Text message;
 
-    public float turnDelay = 2f;
+    public float turnDelay = 1f;
 
     //adjust this potentially
     [Header("Color Pallete")]
@@ -181,6 +182,8 @@ public class TurnBase : MonoBehaviour
         {
             //change later
             EndBattle(BattleState.Won, "You Won!!");
+            yield return new WaitForSeconds(turnDelay);
+            SceneManager.LoadScene("MainMenu");
             yield break;
         }
 
@@ -194,6 +197,8 @@ public class TurnBase : MonoBehaviour
             if (player.health.IsDead)
             {
                 EndBattle(BattleState.Lost, "You Lost");
+                yield return new WaitForSeconds(turnDelay);
+                SceneManager.LoadScene("MainMenu");
                 yield break;
             }
         }
@@ -204,11 +209,15 @@ public class TurnBase : MonoBehaviour
         {
             //change later
             EndBattle(BattleState.Won, "You Won!!");
+            yield return new WaitForSeconds(turnDelay);
+            SceneManager.LoadScene("MainMenu");
             yield break;
         }
         if (player.health.IsDead)
         {
             EndBattle(BattleState.Lost, "You Lost");
+            yield return new WaitForSeconds(turnDelay);
+            SceneManager.LoadScene("MainMenu");
             yield break;
         }
 
@@ -217,15 +226,15 @@ public class TurnBase : MonoBehaviour
 
     IEnumerator UseMove(Entity user, Entity target, MoveData move)
     {
-        if (move.sound != null)
-        {
-            SoundFXManager.instance.PlaySoundFXCLip(move.sound, transform, 2f);
-        }
-        yield return new WaitForSeconds(turnDelay);
 
         if (move.isHeal || move.givesShield)
         {
             List<Entity> helped = GetSupportTargets(user,move);
+            if (move.sound != null)
+            {
+            SoundFXManager.instance.PlaySoundFXCLip(move.sound, transform, 2f);
+            }   
+            yield return new WaitForSeconds(MoveEffects.Play(move, helped));
             foreach(Entity ally in helped)
             {
                 if (move.isHeal) ally.health.Heal(move.damage);
@@ -258,6 +267,11 @@ public class TurnBase : MonoBehaviour
 
         bool dealsDOT = move.turnsOfDOT > 0 && move.perTurnDOT > 0;
         if (move.damage <= 0 && !dealsDOT) yield break;
+        if (move.sound != null)
+        {
+            SoundFXManager.instance.PlaySoundFXCLip(move.sound, transform, 2f);
+        }
+        yield return new WaitForSeconds(MoveEffects.Play(move, targets));
 
         bool paused = false;
 

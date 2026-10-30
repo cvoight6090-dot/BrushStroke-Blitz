@@ -15,9 +15,13 @@ MonoBehaviour:
   moveName: Deep Fire
   damage: 1
   sound: {fileID: 8300000, guid: c26c47554ba994ddd95e2b2d881f6de1, type: 3}
+  effectPrefab: {fileID: 7326531186247536524, guid: f5fc4f9837c0947098fd05469957c108, type: 3}
+  effectDuration: 1
   isHeal: 0
   usableFrom: 01000000
   buttonColor: {r: 0.8396226, g: 0.2593163, b: 0, a: 1}
+  moveColor: 3
   isAOE: 1
+  givesShield: 0
   perTurnDOT: 1
   turnsOfDOT: 2

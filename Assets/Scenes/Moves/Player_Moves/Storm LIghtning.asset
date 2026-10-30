@@ -15,9 +15,13 @@ MonoBehaviour:
   moveName: Storm Lightning
   damage: 2
   sound: {fileID: 8300000, guid: a5b019bd23c80426d92edad844e7be8b, type: 3}
+  effectPrefab: {fileID: 8717201447027080832, guid: 09d565f31a80442ab9e60787c70637a2, type: 3}
+  effectDuration: 1
   isHeal: 0
   usableFrom: 01000000
   buttonColor: {r: 0.9198228, g: 0.9245283, b: 0.2660199, a: 1}
+  moveColor: 1
   isAOE: 1
+  givesShield: 0
   perTurnDOT: 0
   turnsOfDOT: 0

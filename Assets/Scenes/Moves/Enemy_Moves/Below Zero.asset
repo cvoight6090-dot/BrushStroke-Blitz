@@ -14,9 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MoveData
   moveName: Below Zero
   damage: 2
+  sound: {fileID: 0}
+  effectPrefab: {fileID: 7248760112558536732, guid: 50d74db4a07aa4727a4993ff0476aa49, type: 3}
+  effectDuration: 1
   isHeal: 0
   usableFrom: 
   buttonColor: {r: 1, g: 1, b: 1, a: 1}
+  moveColor: 2
   isAOE: 0
+  givesShield: 0
   perTurnDOT: 0
   turnsOfDOT: 0

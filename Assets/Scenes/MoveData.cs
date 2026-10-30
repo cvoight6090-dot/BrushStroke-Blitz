@@ -11,6 +11,12 @@ public class MoveData : ScriptableObject
     public int damage = 2;
     [SerializeField] public AudioClip sound;
 
+    [Header("Effects")]
+    [Tooltip("Prefab played on target when move is used")]
+    public GameObject effectPrefab;
+    [Tooltip("Seconds to wait for effect before damage lands")]
+    public float effectDuration = 1f;
+
     public bool isHeal = false;
 
     //Which base colors can reach this move. 

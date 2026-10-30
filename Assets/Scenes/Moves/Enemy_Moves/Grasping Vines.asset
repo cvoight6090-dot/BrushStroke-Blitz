@@ -15,6 +15,8 @@ MonoBehaviour:
   moveName: Grasping Vines
   damage: 2
   sound: {fileID: 8300000, guid: c22def993a46f49f1a0c8addcd1b78a3, type: 3}
+  effectPrefab: {fileID: 4116760982583640656, guid: ffdbea60a6d844acdb2947ee5795d3a7, type: 3}
+  effectDuration: 1
   isHeal: 0
   usableFrom: 
   buttonColor: {r: 1, g: 1, b: 1, a: 1}

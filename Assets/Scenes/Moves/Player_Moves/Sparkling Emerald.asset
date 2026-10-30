@@ -15,9 +15,13 @@ MonoBehaviour:
   moveName: Sparkling Emerald
   damage: 1
   sound: {fileID: 8300000, guid: c22def993a46f49f1a0c8addcd1b78a3, type: 3}
+  effectPrefab: {fileID: 4116760982583640656, guid: ffdbea60a6d844acdb2947ee5795d3a7, type: 3}
+  effectDuration: 1
   isHeal: 1
   usableFrom: 01000000
   buttonColor: {r: 0, g: 0.33962262, b: 0.05673809, a: 1}
+  moveColor: 4
   isAOE: 1
+  givesShield: 0
   perTurnDOT: 1
   turnsOfDOT: 1

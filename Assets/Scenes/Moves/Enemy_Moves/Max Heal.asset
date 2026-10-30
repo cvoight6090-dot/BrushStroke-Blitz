@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MoveData
   moveName: Max Heal
   damage: 10
-  sound: {fileID: 0}
+  sound: {fileID: 8300000, guid: 4ae86b7306ea54149baf28a636d8efac, type: 3}
+  effectPrefab: {fileID: 7141128564990393565, guid: 05f34d4f847664136ab029931c2ce9c8, type: 3}
+  effectDuration: 1
   isHeal: 1
   usableFrom: 
   buttonColor: {r: 1, g: 1, b: 1, a: 1}
